@@ -18,6 +18,6 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.md,
+    margin: spacing.lg,
   },
 });

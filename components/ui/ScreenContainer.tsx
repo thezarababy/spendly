@@ -1,13 +1,13 @@
 import React from "react";
 import {
+  StyleProp,
+  StyleSheet,
   Text,
   TextProps,
-  StyleSheet,
-  StyleProp,
   TextStyle,
 } from "react-native";
 
-import { colors, typography } from "@/constants";
+import { colors, spacing, typography } from "@/constants";
 
 type Variant = "heading" | "title" | "body" | "caption";
 
@@ -23,10 +23,7 @@ export default function AppText({
   ...props
 }: AppTextProps) {
   return (
-    <Text
-      style={[styles.base, styles[variant], style]}
-      {...props}
-    >
+    <Text style={[styles.base, styles[variant], style]} {...props}>
       {children}
     </Text>
   );
@@ -51,6 +48,7 @@ const styles = StyleSheet.create({
   body: {
     fontSize: typography.fontSize.md,
     fontFamily: typography.fontFamily.regular,
+    marginBottom: spacing.lg,
   },
 
   caption: {
