@@ -1,9 +1,9 @@
 import React from "react";
 import {
+  StyleProp,
+  StyleSheet,
   Text,
   TextProps,
-  StyleSheet,
-  StyleProp,
   TextStyle,
 } from "react-native";
 
@@ -14,17 +14,19 @@ type Variant = "heading" | "title" | "body" | "caption";
 interface AppTextProps extends TextProps {
   variant?: Variant;
   style?: StyleProp<TextStyle>;
+  color?: string;
 }
 
 export default function AppText({
   children,
   variant = "body",
   style,
+  color,
   ...props
 }: AppTextProps) {
   return (
     <Text
-      style={[styles.base, styles[variant], style]}
+      style={[styles.base, styles[variant], style, color && { color }]}
       {...props}
     >
       {children}
