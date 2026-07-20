@@ -1,4 +1,4 @@
-[
+export const transactions = [
   {
     id: "1",
     title: "Salary",
@@ -22,5 +22,13 @@
     type: "expense",
     category: "Transport",
     date: "2026-07-12",
-  }
-]
+  },
+  {
+    id: "4",
+    title: "Freelance Project",
+    amount: 100000,
+    type: "income",
+    category: "Freelance",
+    date: "2026-07-11",
+  },
+];
