@@ -3,13 +3,17 @@ import Balance from "@/components/home/balance";
 import Header from "@/components/home/header";
 import Summary from "@/components/home/summary";
 import Transactions from "@/components/home/transactions";
-import { ScrollView } from "react-native";
+import { spacing } from "@/constants/spacing";
+import { ScrollView, StyleSheet } from "react-native";
 import { ScreenContainer } from "react-native-screens";
 
 export default function HomeScreen() {
   return (
     <ScreenContainer>
-      <ScrollView>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <Header />
         <Balance />
         <Summary />
@@ -19,3 +23,8 @@ export default function HomeScreen() {
     </ScreenContainer>
   );
 }
+const styles = StyleSheet.create({
+  content: {
+    paddingBottom: spacing["5xl"],
+  },
+});

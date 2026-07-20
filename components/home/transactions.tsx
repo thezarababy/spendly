@@ -20,7 +20,7 @@ export default function Transactions() {
       <FlatList
         data={transactions}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <TransactionCard transaction={item} />}
+        renderItem={({ item }) => <TransactionCard transaction={item as any} />}
       />
     </View>
   );
