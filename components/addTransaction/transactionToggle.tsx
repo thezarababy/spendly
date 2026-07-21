@@ -58,10 +58,12 @@ const styles = StyleSheet.create({
     padding: spacing.xs,
     gap: spacing.xs,
     marginBottom: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   button: {
     flex: 1,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
     borderRadius: radius.md,
     alignItems: "center",
   },
