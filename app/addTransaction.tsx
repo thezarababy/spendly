@@ -1,4 +1,5 @@
 import Header from "@/components/addTransaction/header";
+import TransactionToggle from "@/components/addTransaction/transactionToggle";
 import { ScrollView } from "react-native";
 import { ScreenContainer } from "react-native-screens";
 
@@ -8,7 +9,7 @@ export default function AddTransaction() {
       <ScrollView>
         <Header />
 
-        {/* Transaction Toggle */}
+        <TransactionToggle />
 
         {/* Form */}
 
