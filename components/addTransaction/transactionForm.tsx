@@ -142,12 +142,13 @@ export default function TransactionForm({
       <AppInput
         label="Date"
         value={formData.date.toLocaleDateString()}
-        editable={false}
+        editable={true}
         rightIcon={
           <Ionicons
             name="calendar-outline"
             size={20}
             color={colors.textSecondary}
+            style={styles.dateContent}
           />
         }
       />
@@ -181,6 +182,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: spacing.lg,
+    marginBottom: spacing.lg,
   },
   categoryItem: {
     alignItems: "center",
