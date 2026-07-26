@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.xs,
     gap: spacing.xs,
-    marginBottom: spacing.xl,
+    margin: spacing["2xl"],
     borderWidth: 1,
     borderColor: colors.border,
   },

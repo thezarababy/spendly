@@ -25,6 +25,37 @@ interface TransactionFormProps {
   setFormData: React.Dispatch<React.SetStateAction<TransactionFormData>>;
 }
 
+const categories = [
+  {
+    id: "food",
+    label: "Food",
+    icon: "cart",
+    color: "#FFF3E6",
+    iconColor: "#FF8A00",
+  },
+  {
+    id: "transport",
+    label: "Transport",
+    icon: "car",
+    color: "#EAF4FF",
+    iconColor: "#2388FF",
+  },
+  {
+    id: "bills",
+    label: "Bills",
+    icon: "receipt",
+    color: "#F3E8FF",
+    iconColor: "#A855F7",
+  },
+  {
+    id: "more",
+    label: "More",
+    icon: "ellipsis-horizontal",
+    color: "#F5F5F5",
+    iconColor: "#333",
+  },
+];
+
 export default function TransactionForm({
   formData,
   setFormData,
@@ -61,45 +92,65 @@ export default function TransactionForm({
         }
       />
       <View>
-        <AppText variant="body">Category</AppText>
-
-        <Pressable style={styles.selector} onPress={onPress}>
-          <AppText>{formData.category || "Select Category"}</AppText>
-
-          <Ionicons
-            name="chevron-down"
-            size={20}
-            color={colors.textSecondary}
+        <Pressable onPress={onPress}>
+          <AppInput
+            label="Category"
+            placeholder="Select Category"
+            value={formData.category}
+            rightIcon={
+              <Ionicons
+                name="chevron-down"
+                size={20}
+                color={colors.textSecondary}
+              />
+            }
           />
         </Pressable>
       </View>
 
-      <View style={styles.fieldContainer}>
-        <AppText variant="body">Date</AppText>
+      <View style={styles.categoryGrid}>
+        {categories.map((category) => (
+          <Pressable
+            key={category.id}
+            style={styles.categoryItem}
+            onPress={() =>
+              setFormData({
+                ...formData,
+                category: category.label,
+              })
+            }
+          >
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: category.color,
+                },
+              ]}
+            >
+              <Ionicons
+                name={category.icon as any}
+                size={24}
+                color={category.iconColor}
+              />
+            </View>
 
-        <Pressable
-          style={styles.selector}
-          onPress={() => {
-            // We'll open the date picker later
-          }}
-        >
-          <View style={styles.dateContent}>
-            <Ionicons
-              name="calendar-outline"
-              size={20}
-              color={colors.textSecondary}
-            />
-
-            <AppText>{formData.date.toLocaleDateString()}</AppText>
-          </View>
-
+            <AppText variant="caption">{category.label}</AppText>
+          </Pressable>
+        ))}
+      </View>
+      <AppInput
+        label="Date"
+        value={formData.date.toLocaleDateString()}
+        editable={false}
+        rightIcon={
           <Ionicons
-            name="chevron-forward"
+            name="calendar-outline"
             size={20}
             color={colors.textSecondary}
           />
-        </Pressable>
-      </View>
+        }
+      />
       <AppInput
         placeholder="add notes"
         label="Notes"
@@ -116,7 +167,7 @@ export default function TransactionForm({
 }
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.lg,
+    margin: spacing["2xl"],
   },
   selector: {
     flexDirection: "row",
@@ -125,6 +176,24 @@ const styles = StyleSheet.create({
   },
   fieldContainer: {
     marginBottom: spacing.lg,
+  },
+  categoryGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: spacing.lg,
+  },
+  categoryItem: {
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  iconContainer: {
+    width: 56,
+    height: 56,
+
+    borderRadius: 16,
+
+    justifyContent: "center",
+    alignItems: "center",
   },
   dateContent: {
     flexDirection: "row",

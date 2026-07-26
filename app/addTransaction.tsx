@@ -29,7 +29,6 @@ export default function AddTransaction() {
       <ScrollView>
         <Header />
 
-        {/* cast props to any to satisfy JSX typing */}
         <TransactionToggle
           {...({
             value: formData.transactionType,
