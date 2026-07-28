@@ -1,6 +1,7 @@
 import { colors } from "@/constants/colors";
 import { spacing } from "@/constants/spacing";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React from "react";
 import {
   GestureResponderEvent,
@@ -60,6 +61,8 @@ export default function TransactionForm({
   formData,
   setFormData,
 }: TransactionFormProps) {
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
+
   function onPress(_: GestureResponderEvent): void {
     setFormData((current) => ({
       ...current,
@@ -92,7 +95,7 @@ export default function TransactionForm({
         }
       />
       <View>
-        <Pressable onPress={onPress}>
+        <Pressable onPress={() => setShowDatePicker(true)}>
           <AppInput
             label="Category"
             placeholder="Select Category"
@@ -139,19 +142,22 @@ export default function TransactionForm({
           </Pressable>
         ))}
       </View>
-      <AppInput
-        label="Date"
-        value={formData.date.toLocaleDateString()}
-        editable={true}
-        rightIcon={
-          <Ionicons
-            name="calendar-outline"
-            size={20}
-            color={colors.textSecondary}
-            style={styles.dateContent}
-          />
-        }
-      />
+      <Pressable onPress={DateTimePicker}>
+        <AppInput
+          label="Date"
+          value={formData.date.toLocaleDateString()}
+          editable={false}
+          rightIcon={
+            <Ionicons
+              name="calendar-outline"
+              size={20}
+              color={colors.textSecondary}
+              style={styles.dateContent}
+            />
+          }
+        />
+      </Pressable>
+
       <AppInput
         placeholder="add notes"
         label="Notes"
