@@ -5,44 +5,35 @@ import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import AppText from "../ui/AppText";
 
-export default function TransactionToggle() {
-  const [transactionType, setTransactionType] = React.useState<
-    "expense" | "income"
-  >("expense");
+interface TransactionToggleProps {
+  value: "expense" | "income";
+  onChange: (value: "expense" | "income") => void;
+}
 
+export default function TransactionToggle({
+  value,
+  onChange,
+}: TransactionToggleProps) {
   return (
     <View style={styles.container}>
       <Pressable
-        onPress={() => setTransactionType("expense")}
-        style={[
-          styles.button,
-          transactionType === "expense" && styles.activeButton,
-        ]}
+        onPress={() => onChange("expense")}
+        style={[styles.button, value === "expense" && styles.activeButton]}
       >
         <AppText
-          style={[
-            styles.buttonText,
-            transactionType === "expense" && styles.activeText,
-          ]}
+          style={[styles.buttonText, value === "expense" && styles.activeText]}
         >
-          {" "}
           Expense
         </AppText>
       </Pressable>
+
       <Pressable
-        onPress={() => setTransactionType("income")}
-        style={[
-          styles.button,
-          transactionType === "income" && styles.activeButton,
-        ]}
+        onPress={() => onChange("income")}
+        style={[styles.button, value === "income" && styles.activeButton]}
       >
         <AppText
-          style={[
-            styles.buttonText,
-            transactionType === "income" && styles.activeText,
-          ]}
+          style={[styles.buttonText, value === "income" && styles.activeText]}
         >
-          {" "}
           Income
         </AppText>
       </Pressable>
@@ -57,7 +48,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.xs,
     gap: spacing.xs,
-    margin: spacing["2xl"],
+    marginBottom: spacing.xl,
     borderWidth: 1,
     borderColor: colors.border,
   },
