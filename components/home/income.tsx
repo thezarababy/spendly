@@ -5,14 +5,25 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import AppText from "../ui/AppText";
+import { useTransactions } from "@/store/TransactionContext";
 
 export default function Income() {
+  const { totalIncome } = useTransactions();
+
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      maximumFractionDigits: 0,
+    }).format(val);
+  };
+
   return (
     <View style={styles.container}>
       <AppText variant="title" style={styles.title}>
         Income
       </AppText>
-      <AppText variant="heading">₦200,000</AppText>
+      <AppText variant="heading" style={styles.amountText}>{formatCurrency(totalIncome)}</AppText>
       <Ionicons
         name="arrow-up-circle-outline"
         size={30}
@@ -35,11 +46,14 @@ const styles = StyleSheet.create({
   icon: {
     marginTop: spacing.sm,
     alignItems: "center",
-
     justifyContent: "center",
-    margin: "auto",
+    marginHorizontal: "auto",
   },
   title: {
     marginBottom: spacing.sm,
+    color: colors.textSecondary,
+  },
+  amountText: {
+    color: colors.success,
   },
 });

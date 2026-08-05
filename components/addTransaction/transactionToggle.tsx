@@ -18,10 +18,10 @@ export default function TransactionToggle({
     <View style={styles.container}>
       <Pressable
         onPress={() => onChange("expense")}
-        style={[styles.button, value === "expense" && styles.activeButton]}
+        style={[styles.button, value === "expense" && styles.activeExpenseButton]}
       >
         <AppText
-          style={[styles.buttonText, value === "expense" && styles.activeText]}
+          style={[styles.buttonText, value === "expense" && styles.activeExpenseText]}
         >
           Expense
         </AppText>
@@ -29,10 +29,10 @@ export default function TransactionToggle({
 
       <Pressable
         onPress={() => onChange("income")}
-        style={[styles.button, value === "income" && styles.activeButton]}
+        style={[styles.button, value === "income" && styles.activeIncomeButton]}
       >
         <AppText
-          style={[styles.buttonText, value === "income" && styles.activeText]}
+          style={[styles.buttonText, value === "income" && styles.activeIncomeText]}
         >
           Income
         </AppText>
@@ -58,13 +58,22 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: "center",
   },
-  activeButton: {
-    backgroundColor: colors.primary,
+  activeExpenseButton: {
+    backgroundColor: "#FEE2E2", // Light red
+  },
+  activeIncomeButton: {
+    backgroundColor: "#E8F8EE", // Light green
   },
   buttonText: {
-    color: colors.text,
+    color: colors.textSecondary,
+    fontFamily: "Inter_500Medium",
   },
-  activeText: {
-    color: colors.white,
+  activeExpenseText: {
+    color: colors.expense,
+    fontFamily: "Inter_600SemiBold",
+  },
+  activeIncomeText: {
+    color: colors.income,
+    fontFamily: "Inter_600SemiBold",
   },
 });

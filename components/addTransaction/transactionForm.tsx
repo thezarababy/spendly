@@ -1,40 +1,28 @@
-import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-
+import React, { useState } from "react";
+import { Pressable, StyleSheet, View, Platform, Alert } from "react-native";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 
 import AppButton from "../ui/AppButton";
 import AppInput from "../ui/AppInput";
 import AppText from "../ui/AppText";
 import TransactionToggle from "./transactionToggle";
+import CategoryModal from "./categoryModal";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { colors } from "@/constants/colors";
 import { spacing } from "@/constants/spacing";
+import { useTransactions } from "@/store/TransactionContext";
 
 import {
   TransactionFormData,
   transactionSchema,
 } from "@/app/lib/validation/transactionSchema";
 
-interface TransactionFormData {
-  title: string;
-  amount: string;
-  notes: string;
-  category: string;
-  date: Date;
-  transactionType: "expense" | "income";
-}
-
-interface TransactionFormProps {
-  formData: TransactionFormData;
-  setFormData: React.Dispatch<React.SetStateAction<TransactionFormData>>;
-  onSave: () => void;
-}
-
-const categories = [
+const quickCategories = [
   {
     id: "food",
     label: "Food",
@@ -65,26 +53,71 @@ const categories = [
   },
 ];
 
+const getTodayString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const formatDateDisplay = (dateStr: string) => {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-").map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return dateStr;
+  const date = new Date(parts[0], parts[1] - 1, parts[2]);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const parseDateString = (dateStr: string): Date => {
+  if (!dateStr) return new Date();
+  const parts = dateStr.split("-").map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) return new Date();
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+};
+
 export default function TransactionForm() {
+  const { addTransaction } = useTransactions();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
-
     defaultValues: {
       transactionType: "expense",
       title: "",
       amount: "",
       category: "",
-      date: "",
+      date: getTodayString(),
       notes: "",
     },
   });
 
   const onSubmit = (data: TransactionFormData) => {
-    console.log(data);
+    addTransaction({
+      title: data.title.trim(),
+      amount: parseFloat(data.amount),
+      type: data.transactionType,
+      category: data.category,
+      date: data.date,
+      notes: data.notes?.trim(),
+    });
+
+    try {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e) {
+      // Ignore haptics error on unsupported runtimes (like web simulator)
+    }
+
+    router.back();
   };
 
   return (
@@ -111,6 +144,7 @@ export default function TransactionForm() {
           />
         )}
       />
+
       <Controller
         control={control}
         name="amount"
@@ -133,10 +167,10 @@ export default function TransactionForm() {
           <>
             <AppInput
               label="Category"
-              placeholder="Select Category"
+              placeholder="Select category"
               value={value}
               editable={false}
-              onPress={() => {}}
+              onPress={() => setModalVisible(true)}
               rightIcon={
                 <Ionicons
                   name="chevron-down"
@@ -148,52 +182,104 @@ export default function TransactionForm() {
             />
 
             <View style={styles.categoryGrid}>
-              {categories.map((category) => (
-                <Pressable
-                  key={category.id}
-                  style={styles.categoryItem}
-                  onPress={() => onChange(category.label)}
-                >
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      {
-                        backgroundColor: category.color,
-                      },
-                    ]}
+              {quickCategories.map((category) => {
+                const isSelected = value === category.label;
+                const isMoreItem = category.id === "more";
+                return (
+                  <Pressable
+                    key={category.id}
+                    style={styles.categoryItem}
+                    onPress={() => {
+                      if (isMoreItem) {
+                        setModalVisible(true);
+                      } else {
+                        onChange(category.label);
+                      }
+                    }}
                   >
-                    <Ionicons
-                      name={category.icon as any}
-                      size={24}
-                      color={category.iconColor}
-                    />
-                  </View>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        {
+                          backgroundColor: category.color,
+                        },
+                        isSelected && {
+                          borderWidth: 2,
+                          borderColor: category.iconColor,
+                        },
+                      ]}
+                    >
+                      <Ionicons
+                        name={category.icon as any}
+                        size={24}
+                        color={category.iconColor}
+                      />
+                    </View>
 
-                  <AppText variant="caption">{category.label}</AppText>
-                </Pressable>
-              ))}
+                    <AppText
+                      variant="caption"
+                      style={[
+                        isSelected && {
+                          color: colors.text,
+                          fontFamily: "Inter_600SemiBold",
+                        },
+                      ]}
+                    >
+                      {category.label}
+                    </AppText>
+                  </Pressable>
+                );
+              })}
             </View>
+
+            <CategoryModal
+              isVisible={modalVisible}
+              onClose={() => setModalVisible(false)}
+              onSelectCategory={onChange}
+              selectedCategory={value}
+            />
           </>
         )}
       />
+
       <Controller
         control={control}
         name="date"
         render={({ field: { value, onChange } }) => (
-          <AppInput
-            label="Date"
-            placeholder="YYYY-MM-DD"
-            value={value}
-            onChangeText={onChange}
-            rightIcon={
-              <Ionicons
-                name="calendar-outline"
-                size={20}
-                color={colors.textSecondary}
+          <>
+            <AppInput
+              label="Date"
+              placeholder="Select Date"
+              value={formatDateDisplay(value)}
+              editable={false}
+              onPress={() => setShowDatePicker(true)}
+              rightIcon={
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color={colors.textSecondary}
+                />
+              }
+              error={errors.date?.message}
+            />
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={parseDateString(value)}
+                mode="date"
+                display="default"
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(Platform.OS === "ios");
+                  if (selectedDate) {
+                    const yyyy = selectedDate.getFullYear();
+                    const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
+                    const dd = String(selectedDate.getDate()).padStart(2, "0");
+                    onChange(`${yyyy}-${mm}-${dd}`);
+                  }
+                }}
               />
-            }
-            error={errors.date?.message}
-          />
+            )}
+          </>
         )}
       />
 
@@ -202,7 +288,7 @@ export default function TransactionForm() {
         name="notes"
         render={({ field: { value, onChange } }) => (
           <AppInput
-            label="Notes"
+            label="Notes (optional)"
             placeholder="Add a note..."
             value={value ?? ""}
             onChangeText={onChange}
@@ -213,44 +299,42 @@ export default function TransactionForm() {
           />
         )}
       />
-      <AppButton title="Save Transaction" onPress={handleSubmit(onSubmit)} />
+
+      <View style={styles.buttonContainer}>
+        <AppButton title="Save Transaction" onPress={handleSubmit(onSubmit)} />
+      </View>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     margin: spacing["2xl"],
   },
-  selector: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  fieldContainer: {
-    marginBottom: spacing.lg,
-  },
   categoryGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: spacing.lg,
+    marginTop: spacing.xs,
     marginBottom: spacing.lg,
   },
   categoryItem: {
     alignItems: "center",
-    gap: spacing.sm,
+    gap: spacing.xs,
+    width: "22%",
   },
   iconContainer: {
     width: 56,
     height: 56,
-
-    borderRadius: 16,
-
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  dateContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
+  buttonContainer: {
+    marginTop: spacing.xl,
   },
 });

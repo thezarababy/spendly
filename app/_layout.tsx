@@ -3,6 +3,7 @@ import {useFonts} from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from 'react';
+import { TransactionProvider } from '@/store/TransactionContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,12 +28,12 @@ export default function RootLayout() {
 
 
   return (
-    <Stack screenOptions={{headerShown:false}}>
-<Stack.Screen name='(tabs)'/>
-<Stack.Screen name='addTransaction'/>
-
-
-    </Stack>
+    <TransactionProvider>
+      <Stack screenOptions={{headerShown:false}}>
+        <Stack.Screen name='(tabs)'/>
+        <Stack.Screen name='addTransaction'/>
+      </Stack>
+    </TransactionProvider>
     
   );
 }
