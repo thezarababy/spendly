@@ -1,17 +1,17 @@
 import TransactionCard from "@/components/transaction/transactionCard";
+import { colors } from "@/constants/colors";
 import { spacing } from "@/constants/spacing";
+import { useTransactions } from "@/store/TransactionContext";
+import { router } from "expo-router";
 import React from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import AppText from "../ui/AppText";
-import { useTransactions } from "@/store/TransactionContext";
-import { router } from "expo-router";
-import { colors } from "@/constants/colors";
 
 export default function Transactions() {
   const { transactions } = useTransactions();
-  
+
   // Show only the 4 most recent transactions
-  const recentTransactions = transactions.slice(0, 4);
+  const recentTransactions = transactions.slice(0, 3);
 
   const handleSeeAll = () => {
     router.push("/(tabs)/Transactions");

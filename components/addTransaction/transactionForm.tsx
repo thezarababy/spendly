@@ -1,17 +1,18 @@
-import React, { useState } from "react";
-import { Pressable, StyleSheet, View, Platform, Alert } from "react-native";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
 import { Ionicons } from "@expo/vector-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Button, Dialog, Paragraph, Portal } from "react-native-paper";
 import AppButton from "../ui/AppButton";
 import AppInput from "../ui/AppInput";
 import AppText from "../ui/AppText";
-import TransactionToggle from "./transactionToggle";
 import CategoryModal from "./categoryModal";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import TransactionToggle from "./transactionToggle";
 
 import { colors } from "@/constants/colors";
 import { spacing } from "@/constants/spacing";
@@ -84,6 +85,9 @@ export default function TransactionForm() {
   const { addTransaction } = useTransactions();
   const [modalVisible, setModalVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
+  const [errorVisible, setErrorVisible] = useState(false);
+  const [message, setMessage] = useState("");
 
   const {
     control,
@@ -102,22 +106,36 @@ export default function TransactionForm() {
   });
 
   const onSubmit = (data: TransactionFormData) => {
-    addTransaction({
-      title: data.title.trim(),
-      amount: parseFloat(data.amount),
-      type: data.transactionType,
-      category: data.category,
-      date: data.date,
-      notes: data.notes?.trim(),
-    });
-
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (e) {
-      // Ignore haptics error on unsupported runtimes (like web simulator)
-    }
+      addTransaction({
+        title: data.title.trim(),
+        amount: parseFloat(data.amount),
+        type: data.transactionType,
+        category: data.category,
+        date: data.date,
+        notes: data.notes?.trim(),
+      });
 
-    router.back();
+      const friendly =
+        data.transactionType === "income" ? "Income added" : "Expense added";
+      setMessage(`${friendly}: ${data.title.trim()} • ${data.amount}`);
+      setSuccessVisible(true);
+
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch (e) {
+        // ignore
+      }
+    } catch (err) {
+      setMessage("An error occurred while adding the transaction.");
+      setErrorVisible(true);
+
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } catch (e) {
+        // ignore
+      }
+    }
   };
 
   return (
@@ -165,6 +183,43 @@ export default function TransactionForm() {
         name="category"
         render={({ field: { value, onChange } }) => (
           <>
+            <Portal>
+              <Dialog
+                visible={successVisible}
+                onDismiss={() => {
+                  setSuccessVisible(false);
+                  router.back();
+                }}
+              >
+                <Dialog.Title>Success</Dialog.Title>
+                <Dialog.Content>
+                  <Paragraph>{message}</Paragraph>
+                </Dialog.Content>
+                <Dialog.Actions>
+                  <Button
+                    onPress={() => {
+                      setSuccessVisible(false);
+                      router.back();
+                    }}
+                  >
+                    OK
+                  </Button>
+                </Dialog.Actions>
+              </Dialog>
+
+              <Dialog
+                visible={errorVisible}
+                onDismiss={() => setErrorVisible(false)}
+              >
+                <Dialog.Title>Error</Dialog.Title>
+                <Dialog.Content>
+                  <Paragraph>{message}</Paragraph>
+                </Dialog.Content>
+                <Dialog.Actions>
+                  <Button onPress={() => setErrorVisible(false)}>OK</Button>
+                </Dialog.Actions>
+              </Dialog>
+            </Portal>
             <AppInput
               label="Category"
               placeholder="Select category"
@@ -272,7 +327,10 @@ export default function TransactionForm() {
                   setShowDatePicker(Platform.OS === "ios");
                   if (selectedDate) {
                     const yyyy = selectedDate.getFullYear();
-                    const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
+                    const mm = String(selectedDate.getMonth() + 1).padStart(
+                      2,
+                      "0",
+                    );
                     const dd = String(selectedDate.getDate()).padStart(2, "0");
                     onChange(`${yyyy}-${mm}-${dd}`);
                   }

@@ -1,9 +1,15 @@
-import {Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold} from '@expo-google-fonts/inter';
-import {useFonts} from 'expo-font';
-import { Stack } from 'expo-router';
+import { TransactionProvider } from "@/store/TransactionContext";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from 'react';
-import { TransactionProvider } from '@/store/TransactionContext';
+import { useEffect } from "react";
+import { Provider as PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,7 +21,7 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
-   useEffect(() => {
+  useEffect(() => {
     if (fontsLoaded || error) {
       SplashScreen.hideAsync();
     }
@@ -24,16 +30,15 @@ export default function RootLayout() {
   if (!fontsLoaded && !error) {
     return null;
   }
-  
-
 
   return (
-    <TransactionProvider>
-      <Stack screenOptions={{headerShown:false}}>
-        <Stack.Screen name='(tabs)'/>
-        <Stack.Screen name='addTransaction'/>
-      </Stack>
-    </TransactionProvider>
-    
+    <PaperProvider>
+      <TransactionProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="addTransaction" />
+        </Stack>
+      </TransactionProvider>
+    </PaperProvider>
   );
 }
