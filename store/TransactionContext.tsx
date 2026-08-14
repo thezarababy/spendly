@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 
 export interface Transaction {
   id: string;
@@ -13,12 +13,18 @@ export interface Transaction {
 interface TransactionContextType {
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, "id">) => void;
+  editTransaction: (id: string, updated: Omit<Transaction, "id">) => void;
+  deleteTransaction: (id: string) => void;
+  setEditingTransaction: (tx: Transaction | null) => void;
+  editingTransaction: Transaction | null;
   balance: number;
   totalIncome: number;
   totalExpenses: number;
 }
 
-const TransactionContext = createContext<TransactionContextType | undefined>(undefined);
+const TransactionContext = createContext<TransactionContextType | undefined>(
+  undefined,
+);
 
 const SEED_TRANSACTIONS: Transaction[] = [
   {
@@ -87,7 +93,10 @@ const SEED_TRANSACTIONS: Transaction[] = [
 ];
 
 export function TransactionProvider({ children }: { children: ReactNode }) {
-  const [transactions, setTransactions] = useState<Transaction[]>(SEED_TRANSACTIONS);
+  const [transactions, setTransactions] =
+    useState<Transaction[]>(SEED_TRANSACTIONS);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
 
   const addTransaction = (newTx: Omit<Transaction, "id">) => {
     const transaction: Transaction = {
@@ -95,6 +104,16 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       id: Math.random().toString(36).substring(2, 9),
     };
     setTransactions((prev) => [transaction, ...prev]);
+  };
+
+  const editTransaction = (id: string, updated: Omit<Transaction, "id">) => {
+    setTransactions((prev) =>
+      prev.map((tx) => (tx.id === id ? { ...tx, ...updated } : tx)),
+    );
+  };
+
+  const deleteTransaction = (id: string) => {
+    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
   };
 
   // Calculations
@@ -113,6 +132,10 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       value={{
         transactions,
         addTransaction,
+        editTransaction,
+        deleteTransaction,
+        setEditingTransaction,
+        editingTransaction,
         balance,
         totalIncome,
         totalExpenses,
@@ -126,7 +149,9 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
 export function useTransactions() {
   const context = useContext(TransactionContext);
   if (!context) {
-    throw new Error("useTransactions must be used within a TransactionProvider");
+    throw new Error(
+      "useTransactions must be used within a TransactionProvider",
+    );
   }
   return context;
 }

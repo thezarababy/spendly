@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { Animated, Platform, Pressable, StyleSheet, View } from "react-native";
 
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Button, Dialog, Paragraph, Portal } from "react-native-paper";
@@ -82,7 +82,12 @@ const parseDateString = (dateStr: string): Date => {
 };
 
 export default function TransactionForm() {
-  const { addTransaction } = useTransactions();
+  const {
+    addTransaction,
+    editingTransaction,
+    editTransaction,
+    setEditingTransaction,
+  } = useTransactions();
   const [modalVisible, setModalVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [successVisible, setSuccessVisible] = useState(false);
@@ -92,6 +97,7 @@ export default function TransactionForm() {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -105,20 +111,59 @@ export default function TransactionForm() {
     },
   });
 
+  useEffect(() => {
+    if (editingTransaction) {
+      // populate form with editing values
+      const tx = editingTransaction;
+      reset({
+        transactionType: tx.type,
+        title: tx.title,
+        amount: String(tx.amount),
+        category: tx.category,
+        date: tx.date,
+        notes: tx.notes ?? "",
+      });
+    } else {
+      // reset to defaults
+      reset({
+        transactionType: "expense",
+        title: "",
+        amount: "",
+        category: "",
+        date: getTodayString(),
+        notes: "",
+      });
+    }
+  }, [editingTransaction]);
+
   const onSubmit = (data: TransactionFormData) => {
     try {
-      addTransaction({
-        title: data.title.trim(),
-        amount: parseFloat(data.amount),
-        type: data.transactionType,
-        category: data.category,
-        date: data.date,
-        notes: data.notes?.trim(),
-      });
+      if (editingTransaction) {
+        editTransaction(editingTransaction.id, {
+          title: data.title.trim(),
+          amount: parseFloat(data.amount),
+          type: data.transactionType,
+          category: data.category,
+          date: data.date,
+          notes: data.notes?.trim(),
+        });
+        setMessage("Transaction updated");
+        setEditingTransaction(null);
+      } else {
+        addTransaction({
+          title: data.title.trim(),
+          amount: parseFloat(data.amount),
+          type: data.transactionType,
+          category: data.category,
+          date: data.date,
+          notes: data.notes?.trim(),
+        });
 
-      const friendly =
-        data.transactionType === "income" ? "Income added" : "Expense added";
-      setMessage(`${friendly}: ${data.title.trim()} • ${data.amount}`);
+        const friendly =
+          data.transactionType === "income" ? "Income added" : "Expense added";
+        setMessage(`${friendly}: ${data.title.trim()} • ${data.amount}`);
+      }
+
       setSuccessVisible(true);
 
       try {
@@ -137,6 +182,21 @@ export default function TransactionForm() {
       }
     }
   };
+
+  // Animated scale for success icon
+  const successScale = useRef(new Animated.Value(0.6)).current;
+
+  useEffect(() => {
+    if (successVisible) {
+      successScale.setValue(0.6);
+      Animated.spring(successScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 6,
+        tension: 80,
+      }).start();
+    }
+  }, [successVisible, successScale]);
 
   return (
     <View style={styles.container}>
@@ -192,8 +252,17 @@ export default function TransactionForm() {
                 }}
               >
                 <Dialog.Title>Success</Dialog.Title>
-                <Dialog.Content>
-                  <Paragraph>{message}</Paragraph>
+                <Dialog.Content style={styles.successContent}>
+                  <Animated.View
+                    style={{ transform: [{ scale: successScale }] }}
+                  >
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={72}
+                      color={colors.success}
+                    />
+                  </Animated.View>
+                  <Paragraph style={styles.successMessage}>{message}</Paragraph>
                 </Dialog.Content>
                 <Dialog.Actions>
                   <Button
@@ -220,6 +289,7 @@ export default function TransactionForm() {
                 </Dialog.Actions>
               </Dialog>
             </Portal>
+
             <AppInput
               label="Category"
               placeholder="Select category"
@@ -359,7 +429,10 @@ export default function TransactionForm() {
       />
 
       <View style={styles.buttonContainer}>
-        <AppButton title="Save Transaction" onPress={handleSubmit(onSubmit)} />
+        <AppButton
+          title={editingTransaction ? "Update Transaction" : "Save Transaction"}
+          onPress={handleSubmit(onSubmit)}
+        />
       </View>
     </View>
   );
@@ -394,5 +467,13 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: spacing.xl,
+  },
+  successContent: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  successMessage: {
+    textAlign: "center",
+    marginTop: spacing.md,
   },
 });
