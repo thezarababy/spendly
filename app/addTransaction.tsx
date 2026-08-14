@@ -1,4 +1,3 @@
-import Header from "@/components/addTransaction/header";
 import TransactionForm from "@/components/addTransaction/transactionForm";
 import { ScrollView } from "react-native";
 import { ScreenContainer } from "react-native-screens";
@@ -10,8 +9,6 @@ export default function AddTransaction() {
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <Header />
-
         <TransactionForm />
       </ScrollView>
     </ScreenContainer>

@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   Pressable,
@@ -7,24 +8,23 @@ import {
   View,
 } from "react-native";
 import { ScreenContainer } from "react-native-screens";
-import { Ionicons } from "@expo/vector-icons";
 
-import AppText from "@/components/ui/AppText";
 import TransactionCard from "@/components/transaction/transactionCard";
+import AppText from "@/components/ui/AppText";
 
 import { colors } from "@/constants/colors";
 import { radius } from "@/constants/radius";
 import { spacing } from "@/constants/spacing";
-import { useTransactions, Transaction } from "@/store/TransactionContext";
+import { Transaction, useTransactions } from "@/store/TransactionContext";
 
 const formatCardDate = (dateStr: string) => {
   if (!dateStr) return "";
   const parts = dateStr.split("-").map(Number);
   if (parts.length !== 3 || parts.some(isNaN)) return dateStr;
-  
+
   const today = new Date();
   const txDate = new Date(parts[0], parts[1] - 1, parts[2]);
-  
+
   if (
     txDate.getDate() === today.getDate() &&
     txDate.getMonth() === today.getMonth() &&
@@ -32,7 +32,7 @@ const formatCardDate = (dateStr: string) => {
   ) {
     return "Today";
   }
-  
+
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   if (
@@ -53,20 +53,24 @@ const formatCardDate = (dateStr: string) => {
 export default function TransactionsScreen() {
   const { transactions } = useTransactions();
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"all" | "income" | "expense">("all");
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "income" | "expense"
+  >("all");
 
   // Filtering transactions
   const filteredTransactions = transactions.filter((tx) => {
-    const matchesSearch = tx.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          tx.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = activeFilter === "all" ? true : tx.type === activeFilter;
+    const matchesSearch =
+      tx.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tx.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType =
+      activeFilter === "all" ? true : tx.type === activeFilter;
     return matchesSearch && matchesType;
   });
 
   // Helper to group by date
   const groupTransactions = (txList: Transaction[]) => {
     const groups: { [key: string]: Transaction[] } = {};
-    
+
     // Sort transactions by date descending
     const sortedList = [...txList].sort((a, b) => b.date.localeCompare(a.date));
 
@@ -88,17 +92,14 @@ export default function TransactionsScreen() {
 
   return (
     <ScreenContainer style={styles.screen}>
-      <View style={styles.header}>
-        <View style={styles.headerSpacer} />
-        <AppText variant="title" style={styles.headerTitle}>Transactions</AppText>
-        <Pressable style={styles.headerIcon}>
-          <Ionicons name="filter-outline" size={24} color={colors.text} />
-        </Pressable>
-      </View>
-
       {/* Search Input */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search-outline" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+        <Ionicons
+          name="search-outline"
+          size={20}
+          color={colors.textSecondary}
+          style={styles.searchIcon}
+        />
         <TextInput
           placeholder="Search transactions..."
           placeholderTextColor={colors.textLight}
@@ -107,8 +108,15 @@ export default function TransactionsScreen() {
           onChangeText={setSearchQuery}
         />
         {searchQuery.length > 0 && (
-          <Pressable onPress={() => setSearchQuery("")} style={styles.clearButton}>
-            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+          <Pressable
+            onPress={() => setSearchQuery("")}
+            style={styles.clearButton}
+          >
+            <Ionicons
+              name="close-circle"
+              size={18}
+              color={colors.textSecondary}
+            />
           </Pressable>
         )}
       </View>
@@ -122,31 +130,46 @@ export default function TransactionsScreen() {
           >
             <AppText
               variant="body"
-              style={[styles.chipText, activeFilter === "all" && styles.activeChipText]}
+              style={[
+                styles.chipText,
+                activeFilter === "all" && styles.activeChipText,
+              ]}
             >
               All
             </AppText>
           </Pressable>
 
           <Pressable
-            style={[styles.chip, activeFilter === "income" && styles.activeChip]}
+            style={[
+              styles.chip,
+              activeFilter === "income" && styles.activeChip,
+            ]}
             onPress={() => setActiveFilter("income")}
           >
             <AppText
               variant="body"
-              style={[styles.chipText, activeFilter === "income" && styles.activeChipText]}
+              style={[
+                styles.chipText,
+                activeFilter === "income" && styles.activeChipText,
+              ]}
             >
               Income
             </AppText>
           </Pressable>
 
           <Pressable
-            style={[styles.chip, activeFilter === "expense" && styles.activeChip]}
+            style={[
+              styles.chip,
+              activeFilter === "expense" && styles.activeChip,
+            ]}
             onPress={() => setActiveFilter("expense")}
           >
             <AppText
               variant="body"
-              style={[styles.chipText, activeFilter === "expense" && styles.activeChipText]}
+              style={[
+                styles.chipText,
+                activeFilter === "expense" && styles.activeChipText,
+              ]}
             >
               Expense
             </AppText>
@@ -162,11 +185,18 @@ export default function TransactionsScreen() {
       {groupedSections.length === 0 ? (
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconBackground}>
-            <Ionicons name="receipt-outline" size={48} color={colors.textSecondary} />
+            <Ionicons
+              name="receipt-outline"
+              size={48}
+              color={colors.textSecondary}
+            />
           </View>
-          <AppText variant="title" style={styles.emptyTitle}>No transactions found</AppText>
+          <AppText variant="title" style={styles.emptyTitle}>
+            No transactions found
+          </AppText>
           <AppText variant="body" style={styles.emptySubtitle}>
-            Try adjusting your search query or filter options to find what you are looking for.
+            Try adjusting your search query or filter options to find what you
+            are looking for.
           </AppText>
         </View>
       ) : (
@@ -199,8 +229,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: spacing["2xl"],
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
   },
   headerSpacer: {
     width: 24,
@@ -221,8 +249,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.lg,
     marginHorizontal: spacing["2xl"],
-    marginBottom: spacing.lg,
+    marginVertical: spacing.lg,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     height: 48,
   },
   searchIcon: {

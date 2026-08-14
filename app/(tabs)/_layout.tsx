@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
+import AppHeader from '@/components/ui/AppHeader';
 
 export default function TabLayout() {
   return (
-    <Tabs>
+    <Tabs screenOptions={{ header: () => <AppHeader /> }}>
       <Tabs.Screen
         name="index"
         options={{
