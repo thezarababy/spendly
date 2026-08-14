@@ -52,7 +52,32 @@ export default function AppInput({
         {label}
       </AppText>
 
-      <Pressable onPress={onPress}>
+      {onPress ? (
+        <Pressable onPress={onPress} android_ripple={{ color: "transparent" }}>
+          <View style={[styles.inputContainer, error && styles.error]}>
+            <TextInput
+              placeholder={placeholder}
+              value={value}
+              onChangeText={onChangeText}
+              keyboardType={keyboardType}
+              editable={editable}
+              pointerEvents={editable ? "auto" : "none"}
+              multiline={multiline}
+              autoCapitalize={autoCapitalize}
+              numberOfLines={numberOfLines}
+              style={[
+                styles.input,
+                multiline && styles.multilineInput,
+                styles.inputNoOutline,
+              ]}
+              underlineColorAndroid="transparent"
+              placeholderTextColor={colors.textSecondary}
+            />
+
+            {rightIcon}
+          </View>
+        </Pressable>
+      ) : (
         <View style={[styles.inputContainer, error && styles.error]}>
           <TextInput
             placeholder={placeholder}
@@ -64,13 +89,18 @@ export default function AppInput({
             multiline={multiline}
             autoCapitalize={autoCapitalize}
             numberOfLines={numberOfLines}
-            style={[styles.input, multiline && styles.multilineInput]}
+            style={[
+              styles.input,
+              multiline && styles.multilineInput,
+              styles.inputNoOutline,
+            ]}
+            underlineColorAndroid="transparent"
             placeholderTextColor={colors.textSecondary}
           />
 
           {rightIcon}
         </View>
-      </Pressable>
+      )}
 
       {error && (
         <AppText variant="caption" style={styles.error}>
@@ -112,5 +142,9 @@ const styles = StyleSheet.create({
     minHeight: 100,
     textAlignVertical: "top",
     paddingVertical: spacing.md,
+  },
+  inputNoOutline: {
+    outlineWidth: 0,
+    outlineColor: "transparent",
   },
 });
