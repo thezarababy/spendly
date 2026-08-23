@@ -8,36 +8,48 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+import { useCallback, useEffect } from "react";
 import { Provider as PaperProvider } from "react-native-paper";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
-  const [fontsLoaded, error] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
 
-  useEffect(() => {
-    if (fontsLoaded || error) {
-      SplashScreen.hideAsync();
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      try {
+        await SplashScreen.hideAsync();
+      } catch {}
     }
-  }, [fontsLoaded, error]);
+  }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !error) {
+  useEffect(() => {
+    onLayoutRootView();
+  }, [onLayoutRootView]);
+
+  if (!fontsLoaded && !fontError) {
     return null;
   }
 
   return (
-    <PaperProvider>
-      <TransactionProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-      </TransactionProvider>
-    </PaperProvider>
+    <SafeAreaProvider>
+      <PaperProvider>
+        <TransactionProvider>
+          <StatusBar style="auto" />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="addTransaction" />
+          </Stack>
+        </TransactionProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 }
